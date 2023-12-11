@@ -4,6 +4,9 @@ from bs4 import BeautifulSoup
 
 
 choice = int(input('С какого сайта вы хотите скачать фото (erogif, hentaicity, eroticaxxx - 1, paheal - 2): '))
+  
+def bar_progress(current, total, width=80):
+    print("Скачивание: %d%% [%d / %d] битов" % (current / total * 100, current, total))
 
 def parse():
     directory = input('Введите путь до папки: ')
@@ -13,10 +16,13 @@ def parse():
     html = responce.text
     soup = BeautifulSoup(html, 'html.parser')
     images = soup.find_all('img')
+    num_of_images = 1
     for image in images:
         image = image.get('src')
         try:
-            wget.download(image, cleared_directory)
+            print('Файл номер {} скачивается'.format(num_of_images))
+            num_of_images += 1
+            wget.download(image, cleared_directory, bar=bar_progress)
         except Exception:
             pass
 
@@ -28,13 +34,18 @@ def parse_rule34_paheal():
     html = responce.text
     soup = BeautifulSoup(html, 'html.parser')
     images = soup.find_all('a')
+    num_of_images = 1
     for image in images:
         image = image.get('href')
         try:
             if 'https://lotus.paheal.net/_images/' in image and '.mp4' not in image:
-                wget.download(image, cleared_directory)
+                print('Файл номер {} скачивается'.format(num_of_images))
+                num_of_images += 1
+                wget.download(image, cleared_directory, bar=bar_progress)
             elif 'https://tulip.paheal.net/_images/' in image and '.mp4' not in image:
-                wget.download(image, cleared_directory)
+                print('Файл номер {} скачивается'.format(num_of_images))
+                num_of_images += 1
+                wget.download(image, cleared_directory, bar=bar_progress)
         except Exception:
             pass
 
