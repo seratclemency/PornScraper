@@ -1,55 +1,75 @@
-import requests
-import wget
+import customtkinter
 from bs4 import BeautifulSoup
-
-
-choice = int(input('С какого сайта вы хотите скачать фото (erogif, hentaicity, eroticaxxx - 1, paheal - 2): '))
-  
-def bar_progress(current, total, width=80):
-    print("Скачивание: %d%% [%d / %d] битов" % (current / total * 100, current, total))
+import tkinter
+import wget
+import requests
+import threading
+import os
 
 def parse():
-    directory = input('Введите путь до папки: ')
-    cleared_directory = directory.replace('"', '')
-    query = input('Введите ссылку на пост: ')
-    responce = requests.get(query)
+    if not os.path.exists(r'C:\out'):
+        os.mkdir(r'C:\out')
+    user_input = textfield.get()
+    textfield.delete(0, 50)
+    textfield.insert(0, 'Скачивание началось. Посмотрите папку out.')
+    responce = requests.get(user_input)
     html = responce.text
     soup = BeautifulSoup(html, 'html.parser')
     images = soup.find_all('img')
-    num_of_images = 1
     for image in images:
         image = image.get('src')
         try:
-            print('Файл номер {} скачивается'.format(num_of_images))
-            num_of_images += 1
-            wget.download(image, cleared_directory, bar=bar_progress)
+            wget.download(image, r'C:\out')
         except Exception:
             pass
 
 def parse_rule34_paheal():
-    directory = input('Введите путь до папки: ')
-    cleared_directory = directory.replace('"', '')
-    query = input('Введите ссылку на страницу paheal: ')
-    responce = requests.get(query)
+    if not os.path.exists(r'C:\out'):
+        os.mkdir(r'C:\out')
+    user_input = paheal_textfield.get()
+    paheal_textfield.delete(0, 50)
+    paheal_textfield.insert(0, 'Скачивание началось. Посмотрите папку out.')
+    responce = requests.get(user_input)
     html = responce.text
     soup = BeautifulSoup(html, 'html.parser')
     images = soup.find_all('a')
-    num_of_images = 1
     for image in images:
         image = image.get('href')
         try:
             if 'https://lotus.paheal.net/_images/' in image and '.mp4' not in image:
-                print('Файл номер {} скачивается'.format(num_of_images))
-                num_of_images += 1
-                wget.download(image, cleared_directory, bar=bar_progress)
+                wget.download(image, r'C:\out')
             elif 'https://tulip.paheal.net/_images/' in image and '.mp4' not in image:
-                print('Файл номер {} скачивается'.format(num_of_images))
-                num_of_images += 1
-                wget.download(image, cleared_directory, bar=bar_progress)
+                wget.download(image, r'C:\out')
         except Exception:
             pass
 
-if choice == 1:
-    parse()
-elif choice == 2:
-    parse_rule34_paheal()
+def start_parse():
+    threading.Thread(target=parse, daemon=True).start()
+
+def start_parse_paheal():
+    threading.Thread(target=parse_rule34_paheal, daemon=True).start()
+
+customtkinter.set_appearance_mode('dark')
+customtkinter.set_default_color_theme('green')
+
+window = customtkinter.CTk()
+window.geometry('800x800')
+window.title('PornScraper')
+
+pornscraper_label = customtkinter.CTkLabel(master=window, text='PornScraper by serat', font=('Time 30', 20))
+non_paheal_label = customtkinter.CTkLabel(master=window, text='Введите ссылку ниже и нажмите на кнопку:', font=('Time 30', 15))
+paheal_label = customtkinter.CTkLabel(master=window, text='Введите paheal ссылку ниже и нажмите на кнопку:', font=('Time 30', 15))
+parse_button = customtkinter.CTkButton(master=window, text='Парсить', command=start_parse)
+parse_paheal_button = customtkinter.CTkButton(master=window, text='Парсить', command=start_parse_paheal)
+textfield = customtkinter.CTkEntry(master=window, width=300)
+paheal_textfield = customtkinter.CTkEntry(master=window, width=300)
+
+pornscraper_label.pack(pady=50)
+non_paheal_label.pack()
+textfield.pack(pady=20)
+parse_button.pack(pady=50)
+paheal_label.pack()
+paheal_textfield.pack(pady=20)
+parse_paheal_button.pack(pady=50)
+
+window.mainloop()
