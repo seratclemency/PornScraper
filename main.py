@@ -1,7 +1,6 @@
 # Испортируем нужные библиотеки
 import customtkinter
 from bs4 import BeautifulSoup
-import tkinter
 import wget
 import requests
 import threading
